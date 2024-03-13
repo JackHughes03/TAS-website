@@ -153,303 +153,307 @@
 </template>
 
 <script setup>
-import { ref, onMounted  } from 'vue';
-import HelloWorld from '@/components/HelloWorld.vue';
-import { supabase } from '../clients/supabase';
-import axios from 'axios';
-import { Swiper, SwiperSlide } from 'swiper/vue';
-import 'swiper/swiper-bundle.css';
-import SwiperCore, { Pagination, Navigation } from 'swiper/core';
-
-SwiperCore.use([Pagination, Navigation]);
-
-const match1value = ref(""),
-match2value = ref(""),
-datevalue = ref(""),
-locationvalue = ref(""),
-news_headline = ref(""),
-news_description = ref("");
-
-async function get_news_db() {
-  const newsboxcontainer = document.querySelector('.newsboxcontainer');
+  import { ref, onMounted  } from 'vue';
+  import HelloWorld from '@/components/HelloWorld.vue';
+  import { supabase } from '../clients/supabase';
+  import axios from 'axios';
+  import { Swiper, SwiperSlide } from 'swiper/vue';
+  import 'swiper/swiper-bundle.css';
+  import SwiperCore, { Pagination, Navigation } from 'swiper/core';
   
-  let { data: news_table, error } = await supabase
-  .from('news_table')
-  .select('*');
+  SwiperCore.use([Pagination, Navigation]);
   
-  if (error) {
-    console.error('Error fetching data:', error);
-    return;
-  }
+  const match1value = ref(""),
+  match2value = ref(""),
+  datevalue = ref(""),
+  locationvalue = ref(""),
+  news_headline = ref(""),
+  news_description = ref("");
   
-  for (let i = 0; i < news_table.length; i++) {
-    let news = news_table[i];
+  async function get_news_db() {
+    const newsboxcontainer = document.querySelector('.newsboxcontainer');
     
-    const newnews = document.createElement('div');
-    newnews.classList.add('news_boxes');
-    newnews.innerHTML = `
-    <img class="topimage w-full h-full top-0 left-0">
-    <h2 class="font-bold text-xl px-2 mt-2 uppercase">${news.news_heading}</h2>
-    <p class="px-2 pb-2 mt-2">${news.news_para}</p>
-    `;
+    let { data: news_table, error } = await supabase
+    .from('news_table')
+    .select('*');
     
-    newsboxcontainer.appendChild(newnews);
+    if (error) {
+      console.error('Error fetching data:', error);
+      return;
+    }
+    
+    for (let i = 0; i < news_table.length; i++) {
+      let news = news_table[i];
+      
+      const newnews = document.createElement('div');
+      newnews.classList.add('news_boxes');
+      newnews.innerHTML = `
+      <img class="topimage w-full h-full top-0 left-0">
+      <h2 class="tracking-tight leading-tight font-bold text-xl px-2 mt-2 uppercase newsheading">${news.news_heading}</h2>
+      <p class="tracking-tighter leading-tight px-2 pb-2 mt-2 h-48 max-h-48 overflow-y-scroll">${news.news_para}</p>
+      `;
+      
+      if (!news.news_heading || news.news_heading.trim() === "null") {
+        newnews.remove();
+      } else {
+        newsboxcontainer.appendChild(newnews);
+      }
+    }
   }
-}
-
-async function get_DB_Values() {
-  get_news_db()
   
-  const { data, error } = await supabase
-  .from('tas_database')
-  .select('*')
-  .eq('id', 22);
-  
-  if (error) {
-    console.error('Error fetching data:', error);
-    return;
+  async function get_DB_Values() {
+    get_news_db()
+    
+    const { data, error } = await supabase
+    .from('tas_database')
+    .select('*')
+    .eq('id', 22);
+    
+    if (error) {
+      console.error('Error fetching data:', error);
+      return;
+    }
+    
+    const rowData = data[0];
+    
+    if (!rowData) {
+      console.error('No data found for id 22');
+      return;
+    }
+    
+    // console.log('Fetched data:', rowData);
+    
+    match1value.value = rowData.match_1 || '';
+    match2value.value = rowData.match_2 || '';
+    news_headline.value = rowData.news || '';
+    locationvalue.value = rowData.location || '';
+    datevalue.value = rowData.date || '';
   }
   
-  const rowData = data[0];
-  
-  if (!rowData) {
-    console.error('No data found for id 22');
-    return;
+  function expandnav() {
+    const nav = document.querySelector(".normalnav"),
+    hiddennav = document.querySelector(".hiddennav")
+    
+    if (nav.style.height == "50%") {
+      nav.style.height = "48px"
+      hiddennav.style.display = "none"
+    } else {
+      nav.style.height = "50%"
+      hiddennav.style.display = "block"
+    }
   }
   
-  // console.log('Fetched data:', rowData);
-  
-  match1value.value = rowData.match_1 || '';
-  match2value.value = rowData.match_2 || '';
-  news_headline.value = rowData.news || '';
-  locationvalue.value = rowData.location || '';
-  datevalue.value = rowData.date || '';
-}
-
-function expandnav() {
-  const nav = document.querySelector(".normalnav"),
-  hiddennav = document.querySelector(".hiddennav")
-  
-  if (nav.style.height == "50%") {
-    nav.style.height = "48px"
-    hiddennav.style.display = "none"
-  } else {
-    nav.style.height = "50%"
-    hiddennav.style.display = "block"
+  function load_anim() {
+    const nextmatch = document.querySelector('.nextmatch');
+    
+    setTimeout(() => {
+      nextmatch.style.transform = "translateX(0)";
+    }, 200);
   }
-}
-
-function load_anim() {
-  const nextmatch = document.querySelector('.nextmatch');
   
-  setTimeout(() => {
-    nextmatch.style.transform = "translateX(0)";
-  }, 200);
-}
-
-onMounted(() => {
-  get_DB_Values();
-  load_anim();
-})
-
+  onMounted(() => {
+    get_DB_Values();
+    load_anim();
+  })
+  
 </script>
 
 <style lang="scss">
-@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
-
-.vs-icon {
-  transform: skew(-10deg);
-  border: 10px solid;
-  animation: border 3s infinite linear alternate;
-}
-
-.diagonal-container {
-  position: relative;
-  width: 60%;
-  max-width: 500px;
-  height: 100%;
-  overflow: hidden;
-}
-
-
-.diagonal-element {
-  position: absolute;
-  bottom: 0;
-  top: 0;
-  right: 0;
-  width: 100%;
-  background: #000000BC;
-  transform: skewX(-40deg);
-  transform-origin: top right;
-  border-radius: 0 20% 70% 0px;
-  border: 4px solid white;
-  backdrop-filter: blur(5px);
-}
-
-:global(.swiper-pagination-bullet) {
-  background: white;
-}
-.swiper-button-prev, .swiper-button-next {
-  @apply text-white;
-}
-.swiper-button-prev::after, .swiper-button-next::after {
-  @apply text-3xl;
-}
-
-header {
-  // background-image: url("https://cdn.pixabay.com/photo/2016/11/29/07/06/bleachers-1867992_1280.jpg");
-  background-image: url('https://cdn.pixabay.com/photo/2014/10/14/20/24/soccer-488700_1280.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  // background-blend-mode: multiply;
-  // background-color: #00000050;
-}
-
-.hamburger div {
-  position: relative;
-  width: 2em;
-  height: 2.2px;
-  border-radius: 3px;
-  background-color: white;
-  margin-top: 5px;
-  transition: all 0.3s ease-in-out;
-}
-#toggle:checked + .hamburger .top-bun {
-  transform: rotate(-45deg);
-  margin-top: 14px;
-}
-#toggle:checked + .hamburger .bottom-bun {
-  opacity: 0;
-  transform: rotate(45deg);
-}
-#toggle:checked + .hamburger .meat {
-  transform: rotate(45deg);
-  margin-top: -2.5px;
-}
-#toggle:checked + .hamburger + .nav {
-  top: 0;
-  transform: scale(1);
-}
-
-.teams div {
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-blend-mode: multiply;
-  background-color: #00000090;
-  cursor: pointer;
-  transition: all 100ms ease-in-out;
+  @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
   
-  &:hover {
-    background-color: #00000050;
+  .vs-icon {
+    transform: skew(-10deg);
+    border: 10px solid;
+    animation: border 3s infinite linear alternate;
   }
-}
-.teams div:nth-child(1) {
-  background-image: url("https://cdn.pixabay.com/photo/2015/01/26/22/40/child-613199_1280.jpg");
-}
-.teams div:nth-child(2) {
-  background-image: url("https://cdn.pixabay.com/photo/2022/08/17/15/46/soccer-7392844_1280.jpg");
-}
-.teams div:nth-child(3) {
-  background-image: url("https://images.unsplash.com/photo-1624880357913-a8539238245b?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.jpg");
-}
-.teams div:nth-child(4) {
-  background-image: url("https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=1286&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.jpg");
-}
-.teams div:nth-child(5) {
-  background-image: url("https://images.unsplash.com/photo-1624280157150-4d1ed8632989?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.jpg");
-}
-.teams div:nth-child(6) {
-  background-image: url("https://images.unsplash.com/photo-1624003081265-70b1b1ca4f79?q=80&w=1323&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.jpg");
-}
-.teams div:nth-child(7) {
-  background-image: url("https://images.unsplash.com/photo-1624280157322-89596d98aad5?q=80&w=1230&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.jpg");
-}
-.teams div:nth-child(8) {
-  background-image: url("https://images.unsplash.com/photo-1604651684573-05470013b3b9?q=80&w=1169&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.jpg");
-}
-
-#next-match {
-  background-image: url("../assets/pitch.jpg");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  // background-blend-mode: multiply;
-  // background-color: #00000050;
-}
-
-.team-match {
-  transform: skew(-10deg);
-}
-
-.leftbutton, .rightbutton {
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-}
-.leftbutton {
-  background-image: url("../assets/left.png");
-}
-.rightbutton {
-  background-image: url("../assets/right.png");
-}
-
-#adminbutton {
-  background-color: black;
-}
-
-@keyframes border {
-  0% {
-    border-color: #ffffff;
+  
+  .diagonal-container {
+    position: relative;
+    width: 60%;
+    max-width: 500px;
+    height: 100%;
+    overflow: hidden;
   }
-  100% {
-    border-color: #007914;
+  
+  
+  .diagonal-element {
+    position: absolute;
+    bottom: 0;
+    top: 0;
+    right: 0;
+    width: 100%;
+    background: #000000BC;
+    transform: skewX(-40deg);
+    transform-origin: top right;
+    border-radius: 0 20% 70% 0px;
+    border: 4px solid white;
+    backdrop-filter: blur(5px);
   }
-}
-
-.news_boxes {
-  @apply md:w-[250px] h-[300px] flex justify-end flex-col w-full bg-white text-black;
-  // background-position: center;
-  // background-size: cover;
-  // background-repeat: no-repeat;
-  // background-image: url('https://cdn.pixabay.com/photo/2015/01/26/22/40/child-613199_1280.jpg');
-  // background-blend-mode: multiply;
-  // background-color: #00000080;
-}
-
-.topimage {
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-blend-mode: multiply;
-  background-color: #00000080;
-}
-
-.topimage:nth-child(1) {
-  background-image: url("https://cdn.pixabay.com/photo/2015/01/26/22/40/child-613199_1280.jpg");
-}
-.topimage:nth-child(2) {
-  background-image: url("https://cdn.pixabay.com/photo/2022/08/17/15/46/soccer-7392844_1280.jpg");
-}
-.topimage:nth-child(3) {
-  background-image: url("https://images.unsplash.com/photo-1624880357913-a8539238245b?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.jpg");
-}
-.topimage:nth-child(4) {
-  background-image: url("https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=1286&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.jpg");
-}
-.topimage:nth-child(5) {
-  background-image: url("https://images.unsplash.com/photo-1624280157150-4d1ed8632989?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.jpg");
-}
-.topimage:nth-child(6) {
-  background-image: url("https://images.unsplash.com/photo-1624003081265-70b1b1ca4f79?q=80&w=1323&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.jpg");
-}
-.topimage:nth-child(7) {
-  background-image: url("https://images.unsplash.com/photo-1624280157322-89596d98aad5?q=80&w=1230&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.jpg");
-}
-.topimage:nth-child(8) {
-  background-image: url("https://images.unsplash.com/photo-1604651684573-05470013b3b9?q=80&w=1169&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.jpg");
-}
+  
+  :global(.swiper-pagination-bullet) {
+    background: white;
+  }
+  .swiper-button-prev, .swiper-button-next {
+    @apply text-white;
+  }
+  .swiper-button-prev::after, .swiper-button-next::after {
+    @apply text-3xl;
+  }
+  
+  header {
+    /* background-image: url("https://cdn.pixabay.com/photo/2016/11/29/07/06/bleachers-1867992_1280.jpg"); */
+    background-image: url('https://cdn.pixabay.com/photo/2014/10/14/20/24/soccer-488700_1280.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    /* background-blend-mode: multiply;
+    background-color: #00000050; */
+  }
+  
+  .hamburger div {
+    position: relative;
+    width: 2em;
+    height: 2.2px;
+    border-radius: 3px;
+    background-color: white;
+    margin-top: 5px;
+    transition: all 0.3s ease-in-out;
+  }
+  #toggle:checked + .hamburger .top-bun {
+    transform: rotate(-45deg);
+    margin-top: 14px;
+  }
+  #toggle:checked + .hamburger .bottom-bun {
+    opacity: 0;
+    transform: rotate(45deg);
+  }
+  #toggle:checked + .hamburger .meat {
+    transform: rotate(45deg);
+    margin-top: -2.5px;
+  }
+  #toggle:checked + .hamburger + .nav {
+    top: 0;
+    transform: scale(1);
+  }
+  
+  .teams div {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-blend-mode: multiply;
+    background-color: #00000090;
+    cursor: pointer;
+    transition: all 100ms ease-in-out;
+    
+    &:hover {
+      background-color: #00000050;
+    }
+  }
+  .teams div:nth-child(1) {
+    background-image: url("https://cdn.pixabay.com/photo/2015/01/26/22/40/child-613199_1280.jpg");
+  }
+  .teams div:nth-child(2) {
+    background-image: url("https://cdn.pixabay.com/photo/2022/08/17/15/46/soccer-7392844_1280.jpg");
+  }
+  .teams div:nth-child(3) {
+    background-image: url("https://images.unsplash.com/photo-1624880357913-a8539238245b?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.jpg");
+  }
+  .teams div:nth-child(4) {
+    background-image: url("https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=1286&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.jpg");
+  }
+  .teams div:nth-child(5) {
+    background-image: url("https://images.unsplash.com/photo-1624280157150-4d1ed8632989?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.jpg");
+  }
+  .teams div:nth-child(6) {
+    background-image: url("https://images.unsplash.com/photo-1624003081265-70b1b1ca4f79?q=80&w=1323&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.jpg");
+  }
+  .teams div:nth-child(7) {
+    background-image: url("https://images.unsplash.com/photo-1624280157322-89596d98aad5?q=80&w=1230&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.jpg");
+  }
+  .teams div:nth-child(8) {
+    background-image: url("https://images.unsplash.com/photo-1604651684573-05470013b3b9?q=80&w=1169&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.jpg");
+  }
+  
+  #next-match {
+    background-image: url("../assets/pitch.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    /* background-blend-mode: multiply;
+    background-color: #00000050; */
+  }
+  
+  .team-match {
+    transform: skew(-10deg);
+  }
+  
+  .leftbutton, .rightbutton {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+  .leftbutton {
+    background-image: url("../assets/left.png");
+  }
+  .rightbutton {
+    background-image: url("../assets/right.png");
+  }
+  
+  #adminbutton {
+    background-color: black;
+  }
+  
+  @keyframes border {
+    0% {
+      border-color: #ffffff;
+    }
+    100% {
+      border-color: #007914;
+    }
+  }
+  
+  .news_boxes {
+    @apply md:w-[250px] h-[300px] flex justify-end flex-col w-full bg-white text-black;
+    /* background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-image: url('https://cdn.pixabay.com/photo/2015/01/26/22/40/child-613199_1280.jpg');
+    background-blend-mode: multiply;
+    background-color: #00000080; */
+  }
+  
+  .topimage {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-blend-mode: multiply;
+    background-color: #00000080;
+  }
+  
+  .topimage:nth-child(1) {
+    background-image: url("https://cdn.pixabay.com/photo/2015/01/26/22/40/child-613199_1280.jpg");
+  }
+  .topimage:nth-child(2) {
+    background-image: url("https://cdn.pixabay.com/photo/2022/08/17/15/46/soccer-7392844_1280.jpg");
+  }
+  .topimage:nth-child(3) {
+    background-image: url("https://images.unsplash.com/photo-1624880357913-a8539238245b?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.jpg");
+  }
+  .topimage:nth-child(4) {
+    background-image: url("https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=1286&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.jpg");
+  }
+  .topimage:nth-child(5) {
+    background-image: url("https://images.unsplash.com/photo-1624280157150-4d1ed8632989?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.jpg");
+  }
+  .topimage:nth-child(6) {
+    background-image: url("https://images.unsplash.com/photo-1624003081265-70b1b1ca4f79?q=80&w=1323&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.jpg");
+  }
+  .topimage:nth-child(7) {
+    background-image: url("https://images.unsplash.com/photo-1624280157322-89596d98aad5?q=80&w=1230&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.jpg");
+  }
+  .topimage:nth-child(8) {
+    background-image: url("https://images.unsplash.com/photo-1604651684573-05470013b3b9?q=80&w=1169&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.jpg");
+  }
 </style>
 
 <!-- Qrap9ufrDRxXirQi -->
