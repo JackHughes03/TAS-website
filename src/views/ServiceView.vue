@@ -1,6 +1,6 @@
 <template>
-  <div class="service w-full h-full bg-[#43425D] absolute text-[#222222] flex items-center justify-center">    
-    <form class="flex flex-col justify-center items-center bg-white w-[300px] rounded pt-4 pb-3">
+  <div class="service w-full h-full bg-blue-950 absolute text-[#222222] flex items-center justify-center">    
+    <form class="scale-75 sm:scale-100 flex flex-col justify-center items-center bg-white w-[300px] rounded pt-4 pb-3">
       <p class="font-semibold text-center px-4"
       :class="{
         'text-red-600': successorno === 'Invalid credentials' || successorno === 'Error logging out',
@@ -136,5 +136,12 @@ function revealpass() {
 
 onMounted(() => {
   logout();
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      login();
+    }
+  });
 });
 </script>

@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@emailjs/browser": "^4.1.0",
+    "@google/model-viewer": "^3.4.0",
     "@supabase/supabase-js": "^2.39.3",
     "@vuepic/vue-datepicker": "^8.0.0",
     "axios": "^1.6.7",
@@ -17,9 +18,11 @@
     "messagebird": "^4.0.1",
     "mysql2": "^3.9.1",
     "supabase": "^1.136.3",
-    "sweetalert2": "^11.10.5",
-    "swiper": "^11.0.6",
+    "sweetalert2": "^11.10.6",
+    "swiper": "^11.1.0",
+    "three": "^0.163.0",
     "vue": "^3.2.13",
+    "vue-3d-model": "^1.4.1",
     "vue-router": "^4.2.5",
     "vue-sweetalert2": "^5.0.5",
     "vuex": "^4.0.0"

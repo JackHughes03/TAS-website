@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-[#0d3e3e] size-full absolute text-white">
+  <div class="bg-blue-950 size-full absolute text-white">
     
     <div class="bg-[#11111180] w-full top-0 px-4 text-sm sm:text-base py-10 flex flex-col items-center text-center justify-center gap-4">
       <button class="bg-white hover:bg-[#ffffff95] absolute right-3 top-3 duration-200 text-black font-semibold px-2 rounded mt-1 py-1" @click="returnhome">Return home</button>
@@ -30,11 +30,11 @@
     </div>
     
     <section class="flex items-center sm:flex-row flex-col justify-center gap-2 mt-6 my-6">
-      <button @click="update_news_db" class="bg-black/70 text-white font-semibold px-8 py-3 -skew-x-6 text-lg hover:bg-black duration-200">Update all content</button>
+      <button @click="update_news_db" class="bg-black/70 text-white font-semibold px-8 py-3 -skew-x-6 text-lg hover:bg-black duration-200 updatecontent">Update all content</button>
       <button @click="clear_db" class="bg-black/70 text-white font-semibold px-8 py-3 -skew-x-6 text-lg hover:bg-black duration-200">Clear database</button>
     </section>
     
-    <section class="flex items-center justify-center flex-col sm:flex-row mt-4 max-w-4xl mx-auto gap-4 bg-[#0d3e3e] pb-10">
+    <section class="flex items-center justify-center flex-col sm:flex-row mt-4 max-w-4xl mx-auto gap-4 bg-blue-950 pb-10">
       <section class="bg-[#11111180] flex flex-col sm:w-[40%] w-[90%] items-center justify-center h-[400px]">
         <h2 class="pb-4 font-bold text-lg uppercase">Edit next match</h2>
         
@@ -71,7 +71,7 @@
       </section>
     </section>
     
-    <section class="w-full max-w-4xl h-52 overflow-y-scroll mx-auto bg-[#0d3e3e] newsblock">
+    <section class="w-full max-w-4xl h-52 overflow-y-scroll mx-auto newsblock">
     </section>
   </div>
 </template>
@@ -128,7 +128,12 @@ async function clear_db() {
       return;
     }
     
-    getdb();   
+    getdb();
+    
+    const updatecontent = document.querySelector('.updatecontent');
+    updatecontent.disabled = false;
+    updatecontent.style.opacity = 1;
+    updatecontent.classList.add('hover:bg-black');
   } else {
   }
 }
@@ -143,7 +148,7 @@ async function update_news_db() {
     const newsheadingElement = document.getElementById(newsheadingId);
     if (!newsheadingElement) {
       console.log(`Element with ID ${newsheadingId} not found.`);
-      continue; // Skip this iteration and proceed to the next one
+      continue;
     }
     newsData[newsheadingId] = newsheadingElement.textContent;
     
@@ -177,6 +182,8 @@ async function update_news_db() {
   }
   
   checkdatabase();
+  
+  alert("Updated content");
 }
 
 async function savedata() {
@@ -199,10 +206,17 @@ function add_news() {
   for (let i = 0; i < existingHeadings.length; i++) {
     if (existingHeadings[i].textContent === newnewsheadingText) {
       alert('This news heading already exists');
-      // remove it
       newnews.remove();
+      
       return;
     }
+  }
+  
+  if (existingHeadings.length == 7) {
+    alert('You can only add 5 news items');
+    newnews.remove();
+    
+    return;
   }
   
   const newnewsheading = document.createElement('h2');
@@ -323,8 +337,46 @@ async function getdb(info) {
   }
 }
 
+async function checkamount() {
+  const { data, error } = await supabase
+  .from('news_table')
+  .select('news_heading');
+  
+  if (error) {
+    console.error('Error fetching data:', error);
+    return;
+  }
+  
+  const rowData = data;
+  
+  if (!rowData) {
+    console.error('No data found for id 21');
+    return;
+  }
+  
+  let newsamount = 0;
+  for (let i = 0; i < rowData.length; i++) {
+    newsamount++;
+  }
+  
+  const updatecontent = document.querySelector('.updatecontent');
+  
+  if (newsamount >= 5) {
+    alert("You have reached the maximum amount of news items (5). Please clear the database then you can add more.");
+    
+    updatecontent.disabled = true;
+    updatecontent.style.opacity = 0.5;
+    updatecontent.classList.remove('hover:bg-black');
+  } else {
+    updatecontent.disabled = false;
+    updatecontent.style.opacity = 1;
+    updatecontent.classList.add('hover:bg-black');
+  }
+}
+
 onMounted(() => {
   getdb();
+  checkamount();
 });
 
 
@@ -342,14 +394,13 @@ textarea {
 
 .newsblock {
   &::-webkit-scrollbar {
-    width: 10px;
+    @apply w-[10px];
   }
   &::-webkit-scrollbar-track {
-    background: #f1f1f100;
+    @apply bg-[#f1f1f100];
   }
   &::-webkit-scrollbar-thumb {
-    background: white;
-    border-radius: 20px;
+    @apply bg-white rounded-[20px];
   }
 }
 </style>
